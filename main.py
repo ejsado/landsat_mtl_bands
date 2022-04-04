@@ -17,38 +17,38 @@ def find_landsat_mtls(directory):
 	landsatScenes = []
 	# iterate through the MTL text files
 	for mtl in glob.glob(directory + r"\**\*MTL.txt", recursive=True):
-		print(mtl)
 		splitPath = mtl.split("\\")
-		print(splitPath)
-		# test
 		# get the scene name from the MTL file
-		#sceneName = mtl[len(directory) + 1:-8]
-		#print("found scene: " + sceneName)
-		# add the MTL to the pair
-		#landsatSceneMTLs[sceneName] = [mtl]
-		# find any QA TIFs and add them to the paired list
-		#for qatif in landsatQATIFs:
-			#if sceneName in qatif:
-				#landsatSceneMTLs[sceneName].append(qatif)
+		sceneName = splitPath[-1][:-8]
+		print("found scene: " + sceneName)
+		sceneDir = "\\".join(splitPath[:-1])
+		tifList = []
+		allTifs = glob.glob(sceneDir + r"\*.TIF")
+		# find any TIFs and add them to the image list
+		for tif in allTifs:
+			if sceneName in tif:
+				tifList.append(tif)
+		if len(tifList) > 0:
+			landsatScenes.append(
+				{
+					"scene": sceneName,
+					"mtl": mtl,
+					"images": tifList
+				}
+			)
 	return landsatScenes
 
 
 if __name__ == '__main__':
 	print("Running landsat_mtl_bands")
 	# index all TIF files as (key:value) -> (scene name:[list of TIF files])
-	sceneDict = find_landsat_mtls(imagesFolder)
+	sceneList = find_landsat_mtls(imagesFolder)
+	if len(sceneList) == 0:
+		sys.exit("No scenes found.")
 	if createMosaicDataset:
 		print("creating mosaic dataset: " + mosaicName)
-		# empty variable to be populated by QA TIF properties
-		describeRaster = None
-		for scene in sceneDict:
-			if len(sceneDict[scene]) > 1:
-				# get the properties of the first QA image found
-				describeRaster = arcpy.Describe(sceneDict[scene][1])
-				break
-		# just in case no QA images are found
-		if describeRaster is None:
-			sys.exit("No QA rasters found. Please include all TIFs in the imagesFolder.")
+		# get the properties of the first image found
+		describeRaster = arcpy.Describe(sceneList[0]["images"][0])
 		# set the spatial reference of the raster
 		rasterSpatialRef = describeRaster.spatialReference
 		# run the geoprocessing tool
@@ -62,8 +62,8 @@ if __name__ == '__main__':
 		print("add rasters to mosaic: " + mosaicName)
 		# build a list of MTL files
 		mtlList = []
-		for scene in sceneDict:
-			mtlList.append(sceneDict[scene][0])
+		for scene in sceneList:
+			mtlList.append(sceneList[scene]["mtl"])
 		# set raster type for geoprocessing tool, found here:
 		# https://pro.arcgis.com/en/pro-app/2.8/help/data/imagery/satellite-sensor-raster-types.htm#ESRI_SECTION1_40FE2ABD0A6145728056156125910AFF
 		if imageryType == "LANDSAT_6BANDS":
