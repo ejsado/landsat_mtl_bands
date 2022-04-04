@@ -24,7 +24,7 @@ currentMap = mapList[0]
 imageryType = "LANDSAT_6BANDS"
 
 # select which operations to perform
-createMosaicDataset = False
+createMosaicDataset = True
 addRastersToMosaic = False
 buildFootprints = False
 buildSeamlines = False
@@ -33,4 +33,4 @@ buildSeamlines = False
 imagesFolder = r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\data\Landsat_4_5_TM_C2_L2_Mar_30"
 
 # name of the mosaic to be edited
-mosaicName = "Landsat4_5Mosaic"
+mosaicName = "Landsat4_5MosaicEE"

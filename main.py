@@ -4,6 +4,8 @@
 
 import sys
 import glob
+import arcpy
+
 from options import *
 
 
@@ -29,6 +31,7 @@ def find_landsat_mtls(directory):
 			if sceneName in tif:
 				tifList.append(tif)
 		if len(tifList) > 0:
+			print(tifList)
 			landsatScenes.append(
 				{
 					"scene": sceneName,
@@ -51,6 +54,7 @@ if __name__ == '__main__':
 		describeRaster = arcpy.Describe(sceneList[0]["images"][0])
 		# set the spatial reference of the raster
 		rasterSpatialRef = describeRaster.spatialReference
+		print(rasterSpatialRef)
 		# run the geoprocessing tool
 		arcpy.CreateMosaicDataset_management(
 			arcpy.env.workspace,
@@ -58,14 +62,17 @@ if __name__ == '__main__':
 			rasterSpatialRef,
 			product_definition=imageryType
 		)
+		describeMosaic = arcpy.Describe(arcpy.env.workspace + "\\" + mosaicName)
+		print(describeMosaic.defaultProcessingTemplate)
 	if addRastersToMosaic:
 		print("add rasters to mosaic: " + mosaicName)
 		# build a list of MTL files
 		mtlList = []
 		for scene in sceneList:
-			mtlList.append(sceneList[scene]["mtl"])
+			mtlList.append(scene["mtl"])
+		print(mtlList)
 		# set raster type for geoprocessing tool, found here:
-		# https://pro.arcgis.com/en/pro-app/2.8/help/data/imagery/satellite-sensor-raster-types.htm#ESRI_SECTION1_40FE2ABD0A6145728056156125910AFF
+		# https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/satellite-sensor-raster-types.htm
 		if imageryType == "LANDSAT_6BANDS":
 			rasterType = "Landsat 5 TM"
 		elif imageryType == "LANDSAT_8BANDS":
