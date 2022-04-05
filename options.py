@@ -9,10 +9,6 @@ arcpy.env.overwriteOutput = True
 
 # open project
 aprx = arcpy.mp.ArcGISProject(r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFrontRangeImagery.aprx")
-mapList = aprx.listMaps()
-# select the first map
-# not used currently
-currentMap = mapList[0]
 
 # imagery type
 # must be one of the following:
@@ -24,13 +20,17 @@ currentMap = mapList[0]
 imageryType = "LANDSAT_6BANDS"
 
 # select which operations to perform
+createRasterComposites = True
 createMosaicDataset = True
-addRastersToMosaic = False
-buildFootprints = False
-buildSeamlines = False
+addRastersToMosaic = True
+buildFootprints = True
+buildSeamlines = True
+
+# text to append to raster composites
+compositeText = "_composite"
 
 # full path to directory where the images are stored
 imagesFolder = r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\data\Landsat_4_5_TM_C2_L2_Mar_30"
 
 # name of the mosaic to be edited
-mosaicName = "Landsat4_5MosaicEE"
+mosaicName = "Landsat5MosaicEE"

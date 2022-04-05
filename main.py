@@ -34,7 +34,7 @@ def find_landsat_mtls(directory):
 			print(tifList)
 			landsatScenes.append(
 				{
-					"scene": sceneName,
+					"name": sceneName,
 					"mtl": mtl,
 					"images": tifList
 				}
@@ -48,6 +48,14 @@ if __name__ == '__main__':
 	sceneList = find_landsat_mtls(imagesFolder)
 	if len(sceneList) == 0:
 		sys.exit("No scenes found.")
+	if createRasterComposites:
+		print("creating composite rasters")
+		for scene in sceneList:
+			compositeName = scene["name"] + compositeText
+			print("create composite: " + compositeName)
+			# run the geoprocessing tool to create each composite raster
+			arcpy.CompositeBands_management(scene["mtl"], compositeName)
+			scene["composite"] = arcpy.env.workspace + "\\" + compositeName
 	if createMosaicDataset:
 		print("creating mosaic dataset: " + mosaicName)
 		# get the properties of the first image found
@@ -62,29 +70,30 @@ if __name__ == '__main__':
 			rasterSpatialRef,
 			product_definition=imageryType
 		)
-		describeMosaic = arcpy.Describe(arcpy.env.workspace + "\\" + mosaicName)
-		print(describeMosaic.defaultProcessingTemplate)
+		# describeMosaic = arcpy.Describe(arcpy.env.workspace + "\\" + mosaicName)
+		# print(describeMosaic.defaultProcessingTemplate)
 	if addRastersToMosaic:
 		print("add rasters to mosaic: " + mosaicName)
-		# build a list of MTL files
-		mtlList = []
+		# build a list of composite rasters
+		# TODO find created composites
+		compList = []
 		for scene in sceneList:
-			mtlList.append(scene["mtl"])
-		print(mtlList)
+			compList.append(scene["composite"])
+		print(compList)
 		# set raster type for geoprocessing tool, found here:
 		# https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/satellite-sensor-raster-types.htm
-		if imageryType == "LANDSAT_6BANDS":
-			rasterType = "Landsat 5 TM"
-		elif imageryType == "LANDSAT_8BANDS":
-			rasterType = "Landsat 8"
-		else:
-			sys.exit("Invalid 'imageryType' in options.")
-		print(rasterType)
+		# if imageryType == "LANDSAT_6BANDS":
+		# 	rasterType = "Landsat 5 TM"
+		# elif imageryType == "LANDSAT_8BANDS":
+		# 	rasterType = "Landsat 8"
+		# else:
+		# 	sys.exit("Invalid 'imageryType' in options.")
+		# print(rasterType)
 		# run the geoprocessing tool
 		arcpy.AddRastersToMosaicDataset_management(
 			mosaicName,
-			rasterType,
-			mtlList,
+			"Raster Dataset",
+			compList,
 			update_overviews="UPDATE_OVERVIEWS",
 			build_pyramids="BUILD_PYRAMIDS",
 			calculate_statistics="CALCULATE_STATISTICS",
