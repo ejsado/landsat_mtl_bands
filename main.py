@@ -1,6 +1,6 @@
 # this script will automate the creation of a mosaic dataset with imagery
 # it attempts to use predefined band definitions by ESRI
-# Everything is set by the user in "options.py" including band wavelength names
+# everything is set by the user in "options.py"
 
 import sys
 import glob
@@ -9,13 +9,14 @@ import arcpy
 from options import *
 
 
-# scan a directory for MTL text files and QA TIF files
-# return a list of dictionaries with the scene name, MTL file, and list of TIFs
-def find_landsat_mtls(directory):
+# scan a directory for MTL text files and TIF files
+# return a list of dictionaries with the scene name, MTL file, list of TIFs, and associated raster composite
+def find_landsat_scenes(directory):
 	# scene dictionary will have pairs (key: value)
-	# (scene: scene name)
+	# (name: scene name)
 	# (mtl: path to mtl file)
 	# (images: [list of TIF files])
+	# (composite: path to composite raster)
 	landsatScenes = []
 	# iterate through the MTL text files
 	for mtl in glob.glob(directory + r"\**\*MTL.txt", recursive=True):
@@ -23,20 +24,29 @@ def find_landsat_mtls(directory):
 		# get the scene name from the MTL file
 		sceneName = splitPath[-1][:-8]
 		print("found scene: " + sceneName)
+		# get the path to the containing folder
 		sceneDir = "\\".join(splitPath[:-1])
 		tifList = []
+		# find all TIFs in that containing folder
 		allTifs = glob.glob(sceneDir + r"\*.TIF")
-		# find any TIFs and add them to the image list
+		# find any related TIFs and add them to the image list
 		for tif in allTifs:
 			if sceneName in tif:
 				tifList.append(tif)
+		# check if the composite raster already exists for this scene
+		compName = sceneName + compositeText
+		compositePath = None
+		if arcpy.Exists(compName):
+			# if it exists, set it to the full path
+			compositePath = arcpy.env.workspace + "\\" + compName
+		# if related TIFs were found, add the scene to the list
 		if len(tifList) > 0:
-			print(tifList)
 			landsatScenes.append(
 				{
 					"name": sceneName,
 					"mtl": mtl,
-					"images": tifList
+					"images": tifList,
+					"composite": compositePath
 				}
 			)
 	return landsatScenes
@@ -44,8 +54,9 @@ def find_landsat_mtls(directory):
 
 if __name__ == '__main__':
 	print("Running landsat_mtl_bands")
-	# index all TIF files as (key:value) -> (scene name:[list of TIF files])
-	sceneList = find_landsat_mtls(imagesFolder)
+	# index all MTL and related files
+	sceneList = find_landsat_scenes(imagesFolder)
+	# exit if no scenes (MTLs) were found
 	if len(sceneList) == 0:
 		sys.exit("No scenes found.")
 	if createRasterComposites:
@@ -55,14 +66,16 @@ if __name__ == '__main__':
 			print("create composite: " + compositeName)
 			# run the geoprocessing tool to create each composite raster
 			arcpy.CompositeBands_management(scene["mtl"], compositeName)
+			# set the index to the composite in the scene list
 			scene["composite"] = arcpy.env.workspace + "\\" + compositeName
 	if createMosaicDataset:
 		print("creating mosaic dataset: " + mosaicName)
-		# get the properties of the first image found
+		# creating a mosaic dataset requires a spatial reference
+		# this tool assumes all rasters are in the same area
+		# and simply gets the spatial reference of the first TIF found
 		describeRaster = arcpy.Describe(sceneList[0]["images"][0])
 		# set the spatial reference of the raster
 		rasterSpatialRef = describeRaster.spatialReference
-		print(rasterSpatialRef)
 		# run the geoprocessing tool
 		arcpy.CreateMosaicDataset_management(
 			arcpy.env.workspace,
@@ -70,25 +83,16 @@ if __name__ == '__main__':
 			rasterSpatialRef,
 			product_definition=imageryType
 		)
-		# describeMosaic = arcpy.Describe(arcpy.env.workspace + "\\" + mosaicName)
-		# print(describeMosaic.defaultProcessingTemplate)
 	if addRastersToMosaic:
 		print("add rasters to mosaic: " + mosaicName)
 		# build a list of composite rasters
-		# TODO find created composites
 		compList = []
 		for scene in sceneList:
-			compList.append(scene["composite"])
-		print(compList)
-		# set raster type for geoprocessing tool, found here:
-		# https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/satellite-sensor-raster-types.htm
-		# if imageryType == "LANDSAT_6BANDS":
-		# 	rasterType = "Landsat 5 TM"
-		# elif imageryType == "LANDSAT_8BANDS":
-		# 	rasterType = "Landsat 8"
-		# else:
-		# 	sys.exit("Invalid 'imageryType' in options.")
-		# print(rasterType)
+			if scene["composite"]:
+				compList.append(scene["composite"])
+		# exit if no composites are found
+		if len(compList) == 0:
+			sys.exit("No raster composites found.")
 		# run the geoprocessing tool
 		arcpy.AddRastersToMosaicDataset_management(
 			mosaicName,
