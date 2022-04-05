@@ -7,6 +7,12 @@ arcpy.env.workspace = r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFrontRangeIma
 # if this is false, an error will occur when an item already exists
 arcpy.env.overwriteOutput = True
 
+# script settings
+
+# show output of each geoprocessing tool
+# https://pro.arcgis.com/en/pro-app/2.8/arcpy/geoprocessing_and_python/using-tools-in-python.htm
+verboseOutput = True
+
 # open project
 aprx = arcpy.mp.ArcGISProject(r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFrontRangeImagery.aprx")
 
@@ -20,11 +26,11 @@ aprx = arcpy.mp.ArcGISProject(r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFront
 imageryType = "LANDSAT_8BANDS"
 
 # select which operations to perform
-createRasterComposites = False
-createMosaicDataset = False
-addRastersToMosaic = False
-buildFootprints = False
-buildSeamlines = False
+createRasterComposites = True
+createMosaicDataset = True
+addRastersToMosaic = True
+buildFootprints = True
+buildSeamlines = True
 
 # text to append to raster composites
 compositeText = "_composite"

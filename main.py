@@ -65,7 +65,8 @@ if __name__ == '__main__':
 			compositeName = scene["name"] + compositeText
 			print("create composite: " + compositeName)
 			# run the geoprocessing tool to create each composite raster
-			arcpy.CompositeBands_management(scene["mtl"], compositeName)
+			result = arcpy.CompositeBands_management(scene["mtl"], compositeName)
+			if verboseOutput: print(result)
 			# set the index to the composite in the scene list
 			scene["composite"] = arcpy.env.workspace + "\\" + compositeName
 	if createMosaicDataset:
@@ -77,12 +78,13 @@ if __name__ == '__main__':
 		# set the spatial reference of the raster
 		rasterSpatialRef = describeRaster.spatialReference
 		# run the geoprocessing tool
-		arcpy.CreateMosaicDataset_management(
+		result = arcpy.CreateMosaicDataset_management(
 			arcpy.env.workspace,
 			mosaicName,
 			rasterSpatialRef,
 			product_definition=imageryType
 		)
+		if verboseOutput: print(result)
 	if addRastersToMosaic:
 		print("add rasters to mosaic: " + mosaicName)
 		# build a list of composite rasters
@@ -94,7 +96,7 @@ if __name__ == '__main__':
 		if len(compList) == 0:
 			sys.exit("No raster composites found.")
 		# run the geoprocessing tool
-		arcpy.AddRastersToMosaicDataset_management(
+		result = arcpy.AddRastersToMosaicDataset_management(
 			mosaicName,
 			"Raster Dataset",
 			compList,
@@ -103,11 +105,14 @@ if __name__ == '__main__':
 			calculate_statistics="CALCULATE_STATISTICS",
 			duplicate_items_action="OVERWRITE_DUPLICATES"
 		)
+		if verboseOutput: print(result)
 	if buildFootprints:
 		print("building footprints for: " + mosaicName)
-		arcpy.BuildFootprints_management(mosaicName)
+		result = arcpy.BuildFootprints_management(mosaicName)
+		if verboseOutput: print(result)
 	if buildSeamlines:
 		print("building seamlines for: " + mosaicName)
-		arcpy.BuildSeamlines_management(mosaicName)
+		result = arcpy.BuildSeamlines_management(mosaicName)
+		if verboseOutput: print(result)
 
 
