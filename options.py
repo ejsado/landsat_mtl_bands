@@ -17,20 +17,20 @@ aprx = arcpy.mp.ArcGISProject(r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFront
 # based off product_definition values:
 #   https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-mosaic-dataset.htm
 # other types could be supported by adding logic to find and organize other file naming structures
-imageryType = "LANDSAT_6BANDS"
+imageryType = "LANDSAT_8BANDS"
 
 # select which operations to perform
-createRasterComposites = True
-createMosaicDataset = True
-addRastersToMosaic = True
-buildFootprints = True
-buildSeamlines = True
+createRasterComposites = False
+createMosaicDataset = False
+addRastersToMosaic = False
+buildFootprints = False
+buildSeamlines = False
 
 # text to append to raster composites
 compositeText = "_composite"
 
 # full path to directory where the images are stored
-imagesFolder = r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\data\Landsat_4_5_TM_C2_L2_Mar_30"
+imagesFolder = r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\data\Landsat_8_9_OLI_TIRS_C2_L2_Mar_30"
 
 # name of the mosaic to be edited
-mosaicName = "Landsat5MosaicEE"
+mosaicName = "Landsat8MosaicEE"

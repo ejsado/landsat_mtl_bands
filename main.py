@@ -19,7 +19,7 @@ def find_landsat_scenes(directory):
 	# (composite: path to composite raster)
 	landsatScenes = []
 	# iterate through the MTL text files
-	for mtl in glob.glob(directory + r"\**\*MTL.txt", recursive=True):
+	for mtl in glob.glob(directory + r"\**\*_MTL.txt", recursive=True):
 		splitPath = mtl.split("\\")
 		# get the scene name from the MTL file
 		sceneName = splitPath[-1][:-8]
