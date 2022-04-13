@@ -13,9 +13,6 @@ arcpy.env.overwriteOutput = True
 # https://pro.arcgis.com/en/pro-app/2.8/arcpy/geoprocessing_and_python/using-tools-in-python.htm
 verboseOutput = True
 
-# open project
-aprx = arcpy.mp.ArcGISProject(r"D:\ProjectsSyncDesktop\GIS\DenverLandUse\COFrontRangeImagery.aprx")
-
 # imagery type
 # must be one of the following:
 #   LANDSAT_6BANDS - Create a 6-band mosaic dataset using the Landsat 5 and 7 wavelength ranges from the TM and ETM+ sensors.

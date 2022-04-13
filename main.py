@@ -1,4 +1,4 @@
-# this script will automate the creation of a mosaic dataset with imagery
+# this script will automate the creation of a mosaic dataset with Landsat imagery
 # it attempts to use predefined band definitions by ESRI
 # everything is set by the user in "options.py"
 
@@ -11,6 +11,7 @@ from options import *
 
 # scan a directory for MTL text files and TIF files
 # return a list of dictionaries with the scene name, MTL file, list of TIFs, and associated raster composite
+# scenes can be in subfolders, but related MTL and TIF files must be in the same directory
 def find_landsat_scenes(directory):
 	# scene dictionary will have pairs (key: value)
 	# (name: scene name)
